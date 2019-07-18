@@ -70,20 +70,31 @@ def setUniversity():
     close_button.click()
 
 
-# if i == rowUniversityCount setUniversity and do it again, until z-paging-next is disabled
-nextButton = driver.find_element_by_class_name('z-paging-next')
-isNextButtonDisabled = nextButton.get_attribute('disabled')
-while (isNextButtonDisabled != 'disabled' or isNextButtonDisabled != True):
-    print(isNextButtonDisabled)
+def clickNextButton():
+    nextButton = driver.find_element_by_class_name('z-paging-next')
     nextButton.click()
+    try:
+        isNextButtonDisabled = nextButton.get_attribute('disabled')
+        if isNextButtonDisabled == True:
+            print('Checked every page')
+    except:
+        addUniversitiesToList()
+        clickNextButton()
 
-# rowUniversityCount = len(
-#     driver.find_elements_by_class_name('z-listcell-content'))
+def addUniversitiesToList():
+    rowUniversityCount = len(
+    driver.find_elements_by_class_name('z-listcell-content'))
 
-# for i in range(rowUniversityCount):
-#     universityElement = driver.find_elements_by_class_name(
-#         "z-listcell-content")[i]  # find university row
-#     universityElement.click()  # click to university
-#     setUniversity()
+    for i in range(rowUniversityCount):
+        universityElement = driver.find_elements_by_class_name(
+            "z-listcell-content")[i]  # find university row
+        universityElement.click()  # click to university
+        name = getElementText('4g-cap')
+        print('Getting University:', name)
+        setUniversity()
 
-# print(universityList[0].name)
+addUniversitiesToList()
+clickNextButton()
+
+print(universityList[0].name)
+print(universityList[12].name)
