@@ -6,6 +6,8 @@ import re
 # import pandas as pd
 import os
 import sys
+import json
+import io
 
 # set variables
 driver_path = "./geckodriver.exe"  # browser driver path / firefox in this case
@@ -30,6 +32,10 @@ class University(object):
         self.email = email
         self.address = address
         self.warden = warden
+
+    def toJSON(self):
+        return json.dumps(self, ensure_ascii=False, default=lambda o: o.__dict__,
+                          sort_keys=True, indent=4)
 
 
 # get unique id's prefix
@@ -81,9 +87,10 @@ def clickNextButton():
         addUniversitiesToList()
         clickNextButton()
 
+
 def addUniversitiesToList():
     rowUniversityCount = len(
-    driver.find_elements_by_class_name('z-listcell-content'))
+        driver.find_elements_by_class_name('z-listcell-content'))
 
     for i in range(rowUniversityCount):
         universityElement = driver.find_elements_by_class_name(
@@ -93,8 +100,13 @@ def addUniversitiesToList():
         print('Getting University:', name)
         setUniversity()
 
+
 addUniversitiesToList()
 clickNextButton()
+driver.quit()
 
-print(universityList[0].name)
-print(universityList[12].name)
+# todo: too many dumps. you should fix them.
+# format_json = json.dumps(
+#     [ob.toJSON() for ob in universityList], ensure_ascii=False)
+# with io.open('SO_jsonout.json', 'w', encoding='utf8') as outfile:
+#     json.dump(format_json, outfile, ensure_ascii=False)
