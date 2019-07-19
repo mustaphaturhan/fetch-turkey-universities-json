@@ -18,6 +18,7 @@ this little, simple script.
 ## Installation
 
 To run this script, you must have [python](https://www.python.org/) installed on your computer.
+I create this script with Python v3.7.3.
 You can go to python download page by [clicking here](https://www.python.org/downloads/).
 
 First, clone this repository:

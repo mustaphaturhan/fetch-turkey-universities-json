@@ -6,12 +6,15 @@ from bs4 import BeautifulSoup
 import os
 import json
 import io
+import time
+import sys
 
 # set variables
 driver_path = "./geckodriver.exe"  # browser driver path / firefox in this case
 url = "https://eyoksis.yok.gov.tr/websitesiuygulamalari/harita/"  # launch url
 university_list = []  # create empty list for universities
 output_file_name = 'universities.json'  # output file name
+attemp_count = 50
 
 # create a new firefox session
 options = Options()
@@ -41,23 +44,37 @@ def appendUniversity():
 
     university_list.append(university)  # append it to list
 
-    try:
-        close_button = driver.find_element_by_class_name(
-            "z-window-close")  # find close university info window
-        close_button.click()  # click it.
-    except:
-        print('Cannot find close button.')
+    for _ in range(attemp_count):
+        try:
+            close_button = driver.find_element_by_class_name(
+                "z-window-close")  # find close university info window
+            close_button.click()  # click it.
+        except:
+            time.sleep(2)
+            print('Cannot find close button. Retrying...')
+        else:
+            break
+    else:
+        print('Error occured.')
         driver.quit()
+        sys.exit()
 
 
 def goNextPage():
-    try:
-        nextButton = driver.find_element_by_class_name(
-            'z-paging-next')  # find next button
-        nextButton.click()  # click it
-    except:
-        print('Cannot find next button.')
+    for _ in range(attemp_count):
+        try:
+            nextButton = driver.find_element_by_class_name(
+                'z-paging-next')  # find next button
+            nextButton.click()  # click it
+        except:
+            time.sleep(2)
+            print('Cannot find next button. Retrying...')
+        else:
+            break
+    else:
+        print('Error occured.')
         driver.quit()
+        sys.exit()
 
     try:
         isNextButtonDisabled = nextButton.get_attribute(
@@ -66,47 +83,89 @@ def goNextPage():
             print('Checked every page')  # send a message
     except:
         addUniversitiesToList()  # if there is no disabled attribute
-        goNextPage()  # go to the next page
 
 
 # get unique id's prefix
-try:
-    wrapper = driver.find_element_by_class_name('z-page')  # find body wrapper
-    print('Found wrapper')
-except:
-    print('Cannot find body wrapper, are you sure there is element with "z-page" class?')
+for _ in range(attemp_count):
+    try:
+        wrapper = driver.find_element_by_class_name(
+            'z-page')  # find body wrapper
+        print('Found wrapper')
+    except:
+        time.sleep(2)
+        print('Cannot find body wrapper, are you sure there is element with "z-page" class? Retrying...')
+    else:
+        break
+else:
+    print('Error occured.')
     driver.quit()
+    sys.exit()
 
-try:
-    unique_id = wrapper.get_attribute('id')[:-1]  # get wrapper's unique id
-    print('Unique id is:', unique_id)
-except:
-    print('Cannot find unique id')
+# get unique id's prefix
+for _ in range(attemp_count):
+    try:
+        unique_id = wrapper.get_attribute('id')[:-1]  # get wrapper's unique id
+        print('Unique id is:', unique_id)
+    except:
+        time.sleep(2)
+        print('Cannot find unique id. Retrying...')
+    else:
+        break
+else:
+    print('Error occured.')
     driver.quit()
+    sys.exit()
 
 
 def addUniversitiesToList():
-    rowUniversityCount = len(
-        driver.find_elements_by_class_name('z-listcell-content'))  # find universities content
+    for _ in range(attemp_count):
+        try:
+            rowUniversityCount = len(
+                driver.find_elements_by_class_name('z-listcell-content'))  # find universities content
+        except:
+            time.sleep(2)
+            print('Cannot find university count. Retrying...')
+        else:
+            break
+    else:
+        print('Error occured.')
+        driver.quit()
+        sys.exit()
 
     for i in range(rowUniversityCount):  # for every university in table
-        try:
-            universityElement = driver.find_elements_by_class_name(
-                "z-listcell-content")[i]  # find university row
-            universityElement.click()  # click to university
-        except:
-            print('Cannot find university row.')
+        for _ in range(attemp_count):
+            try:
+                universityElement = driver.find_elements_by_class_name(
+                    "z-listcell-content")[i]  # find university row
+                universityElement.click()  # click to university
+            except:
+                time.sleep(2)
+                print('Cannot find university row. Retrying...')
+            else:
+                break
+        else:
+            print('Error occured.')
             driver.quit()
+            sys.exit()
+
         name = getElementText('4g-cap')  # get university name
         print('Getting:', name.title())  # print university name
         appendUniversity()  # append it.
+
+    goNextPage()
 
 
 addUniversitiesToList()
 goNextPage()
 driver.quit()
+print('Creating JSON file')
 
 format_json = [ob for ob in university_list]
 with io.open(output_file_name, 'w', encoding='utf8') as outfile:
     json.dump(format_json, outfile, sort_keys=True,
               indent=2, ensure_ascii=False)
+
+print('JSON file is created.')
+print('Thank you for using this script.')
+print('Bye.')
+sys.exit()
