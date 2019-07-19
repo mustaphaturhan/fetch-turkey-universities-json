@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from bs4 import BeautifulSoup
@@ -16,7 +17,9 @@ sys.tracebacklimit = 0
 universityList = []
 
 # create a new firefox session
-driver = webdriver.Firefox(executable_path=driver_path)
+options = Options()
+options.headless = True
+driver = webdriver.Firefox(options=options, executable_path=driver_path)
 driver.implicitly_wait(1)
 driver.get(url)
 
@@ -24,7 +27,7 @@ driver.get(url)
 
 
 class University(object):
-    def __init__(self, name=None, phone=None, fax=None, web=None, email=None, address=None, warden=None):
+    def __init__(self, name, phone, fax, web, email, address, warden):
         self.name = name
         self.phone = phone
         self.fax = fax
@@ -32,10 +35,6 @@ class University(object):
         self.email = email
         self.address = address
         self.warden = warden
-
-    def toJSON(self):
-        return json.dumps(self, ensure_ascii=False, default=lambda o: o.__dict__,
-                          sort_keys=True, indent=4)
 
 
 # get unique id's prefix
@@ -97,7 +96,7 @@ def addUniversitiesToList():
             "z-listcell-content")[i]  # find university row
         universityElement.click()  # click to university
         name = getElementText('4g-cap')
-        print('Getting University:', name)
+        print('Getting:', name.title())
         setUniversity()
 
 
@@ -105,8 +104,6 @@ addUniversitiesToList()
 clickNextButton()
 driver.quit()
 
-# todo: too many dumps. you should fix them.
-# format_json = json.dumps(
-#     [ob.toJSON() for ob in universityList], ensure_ascii=False)
-# with io.open('SO_jsonout.json', 'w', encoding='utf8') as outfile:
-#     json.dump(format_json, outfile, ensure_ascii=False)
+format_json = [ob.__dict__ for ob in universityList]
+with io.open('SO_jsonout.json', 'w', encoding='utf8') as outfile:
+    json.dump(format_json, outfile, sort_keys=True, indent=2, ensure_ascii=False)
