@@ -1,5 +1,5 @@
 <div align="center">
-<h1>:school: Fetch University List in Turkey</h1>
+<h1>Fetch University List in Turkey</h1>
 <p>Simple python script that fetchs and exports json data for people who wants to use up-to-date university list in Turkey.</p>
 </div>
 
